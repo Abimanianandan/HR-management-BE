@@ -22,13 +22,13 @@ const salarySchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    netPay: {
+    total: {
         type: Number,
         required: true
     },
     paymentDate: {
-        type: Date,
-        default: Date.now
+        type: String,
+        default: () => new Date().toLocaleDateString('en-US')
     }
 });
 

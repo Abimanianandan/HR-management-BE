@@ -46,39 +46,59 @@ register: async (req,res)=>{
    
  },
  //   login admin
- login: async (req,res)=>{
+
+login : async (req, res) => {
    try {
-      // get the admin inputs
-      const {adminname,password} = req.body
-      const admin = await Admin.findOne({adminname});
-      // check the inValid username return a error message
-      if(!admin){
-        return res.status(400).json({message:"Invalid adminname"})
-      }
-      // compare the passwors
-      const isCorrectPassword = await bcrypt.compare(password,admin.passwordHash);
-      // check the inValid password return a error message
-      if(!isCorrectPassword){
-        return res.status(400).json({message:"Invalid password"})
-      }
-      // if the password is correct generate a token and return a success message
-      const token = jwt.sign({
-         adminname : admin.adminname,
-         id : admin._id,
-         name:admin.name
-      },config.JWT_SECRET)
-      // set the cookie with the token
-      res.cookie('token',token,{
-         httpOnly:true,
-         secure:true,
-         sameSite:"none",
-         expire:new Date(Date.now() + 24 * 60 * 60 * 1000)
-      });
-      res.status(200).json({message:"Login Successfully",token})
+     const { adminname, password } = req.body;
+ 
+     // Check if username or password is missing
+     if (!adminname || !password) {
+       return res.status(400).json({ message: "Adminname and password are required" });
+     }
+ 
+     // Find user by adminname
+     const admin = await Admin.findOne({ adminname});
+ 
+     // Check if admin exists
+     if (!admin) {
+       return res.status(400).json({ message: "Invalid adminname or password" });
+     }
+ 
+     // Compare the provided password with hashed password in database
+     const isCorrectPassword =  bcrypt.compare(password, admin.passwordHash);
+ 
+     // Check if password is correct
+     if (!isCorrectPassword) {
+       return res.status(400).json({ message: "Invalid adminname or password" });
+     }
+ 
+    
+    const generateToken = (adminId) => {
+      // Create a JWT token with adminId and a secret key
+      const token = jwt.sign({ id: adminId }, config.JWT_SECRET, { expiresIn: '1h' }); 
+      return token;
+    };
+    
+    const adminId = 'dhonikbm@gmail.com'; 
+    const token = generateToken(adminId);
+     // Send success response with token
+     res.status(200).json({ message: "Login successful", token });
    } catch (error) {
-      res.status(500).json({message:error.message})
+     console.error("Login error:", error.message);
+     res.status(500).json({ message: "Server error" });
    }
-  },
+ },
+
+ logout: async (req,res)=>{
+  try{
+     // clear the token
+      res.clearCookie("token");
+     // return success message
+     res.status(500).json({message:"logout successfully"})
+  } catch(error){
+     res.status(500).json({message:error.message})
+  }
+ },
   //   view admin
   me: async (req,res)=>{
    try{
@@ -119,30 +139,34 @@ register: async (req,res)=>{
         res.status(500).json({message:error.message})
      }
    },
- // get the user by id
-   getUserById: async (req,res)=>{
-    try{
-       // get the user Id from reqest parameters
-       const userId = req.params.id
-       // get the user by id from the database
-       const user = await User.findById(userId).select('-passwordHash-__v')
-       // if the user does not exit return a error message
-       if(!user){
-          res.status(400).json({message:"user not found"})
-       }
-       // return the user
-       res.status(200).json({user})
-    }catch(error){
-       res.status(500).json({message:error.message})
-    }
-   },
- // update the user by id
+ 
+ getUserById: async (req, res) => {
+  try {
+      // Get the user ID from request parameters
+      const userId = req.params.id;
+
+      // Find the user by ID from the database, excluding passwordHash and __v fields
+      const user = await User.findById(userId).select('-passwordHash -__v');
+
+      // If the user does not exist, return an error message
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      // Return the user
+      return res.status(200).json({ user });
+  } catch (error) {
+      // Handle errors and return a 500 status with the error message
+      return res.status(500).json({ message: error.message });
+  }
+},
+
    updateUserById: async (req,res)=>{
     try{
        // get the user id from the request parameters
          const userId = req.params.id;
         // get the user inputs
-        const {name,location} = req.body;
+        const {name,location,username} = req.body;
         // find user by id from the database
         const user = await User.findById(userId)
         // if the user is does not exit, return an error message
@@ -152,6 +176,7 @@ register: async (req,res)=>{
         // update user
         if(name) user.name = name;
         if(location) user.location = location;
+        if(username) user.username = username;
         const updatedUser = await user.save();
   
         // return the  updates user details

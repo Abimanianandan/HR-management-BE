@@ -19,22 +19,33 @@ const leaveController = ({
             res.status(500).json({ message: error.message });
         }
     },
+    
+    getAllLeave: async (req,res)=>{
+        try{
+          //  grt all leave from the database
+          const leave = await Leave.find().select('-passwordHash-__v');
+          // return the success message
+          res.status(200).json({leave});
+        } catch (error){
+           res.status(500).json({message:error.message})
+        }
+      },
 
-    getLeaveByUserId: async (req, res) => {
+    getLeaveByLeaveId: async (req, res) => {
         try {
-            const userId = req.params.id;
-            const leaves = await Leave.find({ userId });
-            if (leaves.length > 0) {
-                res.status(200).json(leaves);
+            const leaveId = req.params.id;
+            const leave = await Leave.findById(leaveId);
+            if (leave) {
+                res.status(200).json(leave);
             } else {
-                res.status(404).json({ message: "No leave records found for this user" });
+                res.status(404).json({ message: "No leave record found for this ID" });
             }
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     },
-
-    updateLeaveStatus: async (req, res) => {
+    
+    updateLeaveByLeaveId: async (req, res) => {
         try {
             const leaveId = req.params.id;
             const { status } = req.body;

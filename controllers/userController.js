@@ -45,39 +45,60 @@ const userController = {
     
   },
 //   login user
-  login: async (req,res)=>{
-   try {
-      // get the user inputs
-      const {username,password} = req.body
-      const user = await User.findOne({username});
-      // check the inValid username return a error message
-      if(!user){
-        return res.status(400).json({message:"Invalid username"})
-      }
-      // compare the passwors
-      const isCorrectPassword = await bcrypt.compare(password,user.passwordHash);
-      // check the inValid password return a error message
-      if(!isCorrectPassword){
-        return res.status(400).json({message:"Invalid password"})
-      }
-      // if the password is correct generate a token and return a success message
-      const token = jwt.sign({
-         username : user.username,
-         id : user._id,
-         name:user.name
-      },config.JWT_SECRET)
-      // set the cookie with the token
-      res.cookie('token',token,{
-         httpOnly:true,
-         secure:true,
-         sameSite:"none",
-         expire:new Date(Date.now() + 24 * 60 * 60 * 1000)
-      });
-      res.status(200).json({message:"Login Successfully",token})
-   } catch (error) {
-      res.status(500).json({message:error.message})
-   }
-  },
+
+login : async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Check if username or password is missing
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required" });
+    }
+
+    // Find user by username
+    const user = await User.findOne({ username });
+
+    // Check if user exists
+    if (!user) {
+      return res.status(400).json({ message: "Invalid username or password" });
+    }
+
+    // Compare the provided password with hashed password in database
+    const isCorrectPassword = await bcrypt.compare(password, user.passwordHash);
+
+    // Check if password is correct
+    if (!isCorrectPassword) {
+      return res.status(400).json({ message: "Invalid username or password" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        username: user.username,
+        id: user._id,
+        name: user.name
+      },
+      config.JWT_SECRET,
+      { expiresIn: "1d" } // Token expires in 1 day
+    );
+
+    // Set cookie with the token
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true, // Use 'false' if not using HTTPS
+      sameSite: "none", // Use 'None' if hosting on a different domain
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000) // 1 day expiry
+    });
+
+    // Send success response with token
+    res.status(200).json({ message: "Login successful", token });
+  } catch (error) {
+    // Handle server errors
+    console.error("Login error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+},
+
 //   view user
   me: async (req,res)=>{
    try{

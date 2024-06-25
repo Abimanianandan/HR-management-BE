@@ -6,26 +6,32 @@ const config = require("../utils/config");
 const User = require("../models/user");
 
 const auth = {
-      isAuth: (req,res,next)=>{
-        try{
-        // get the token from the cookies
-        const token = req.cookies.token;
-        // if the token is not present send a error message
-        if(!token){
-            return res.status(401).json({message:"unAuthorized"});
-        }
-        // verify the token 
-          try{
-              const decodedToken = jwt.verify(token,config.JWT_SECRET);
-              req.userId = decodedToken.id;
-            //   call the next middleware
-            next();
-          } catch(error){
-            res.status(401).json({message:"invalid token"})
-          }
-        } catch(error){
-          res.status(500).json({message:error.message})
-        }
+      
+       isAuth : (req, res, next) => {
+  try {
+    // Get the token from the Authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const token = authHeader.split(' ')[1]; // Extract the token part
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Verify the token
+    try {
+      const decodedToken = jwt.verify(token, config.JWT_SECRET);
+      req.userId = decodedToken.id;
+      // Call the next middleware
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
       },
       isAdmin: async (req,res,next)=>{
         try{

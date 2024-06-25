@@ -12,11 +12,11 @@ const leaveSchema = new mongoose.Schema({
         required: true
     },
     startDate: {
-        type: Date,
+        type: String,
         required: true
     },
     endDate: {
-        type: Date,
+        type: String,
         required: true
     },
     status: {
@@ -29,9 +29,9 @@ const leaveSchema = new mongoose.Schema({
         required: true
     },
     appliedDate: {
-        type: Date,
-        default: Date.now
+        type: String,
+        default: () => new Date().toLocaleDateString('en-US')
     }
 });
 
-module.exports = mongoose.model('Leave', leaveSchema,'Leavies');
+module.exports = mongoose.model('Leave', leaveSchema,'Leaves');

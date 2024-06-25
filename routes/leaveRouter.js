@@ -8,10 +8,11 @@ const auth = require("../middleware/auth");
 const leaveRouter = express.Router();
 
 // create routes
-leaveRouter.post("/",auth.isAuth,leaveController.applyLeave)
-leaveRouter.get("/:id",auth.isAuth,leaveController.getLeaveByUserId)
-leaveRouter.put("/:id",auth.isAuth,leaveController.updateLeaveStatus)
-leaveRouter.delete("/:id",auth.isAuth,leaveController.deleteLeave)
+leaveRouter.post("/",leaveController.applyLeave)
+leaveRouter.get("/allLeaves",leaveController.getAllLeave)
+leaveRouter.get("/:id",leaveController.getLeaveByLeaveId)
+leaveRouter.put("/:id",leaveController.updateLeaveByLeaveId)
+leaveRouter.delete("/:id",leaveController.deleteLeave)
 
 // export leaveRouter
 module.exports = leaveRouter;

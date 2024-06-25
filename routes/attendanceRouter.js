@@ -8,8 +8,10 @@ const auth = require("../middleware/auth");
 const attendanceRouter = express.Router();
 
 // create attendance
-attendanceRouter.post("/",auth.isAuth,attendanceController.createAttendance);
-attendanceRouter.get("/all",auth.isAuth,attendanceController.getAllAttendance);
-attendanceRouter.get("/:id",auth.isAuth,attendanceController.getAttendanceByUserId)
+attendanceRouter.post("/",attendanceController.createAttendance);
+attendanceRouter.get("/allAttendance",attendanceController.getAllAttendance);
+attendanceRouter.get("/:id",attendanceController.getAttendanceByAttendanceId);
+attendanceRouter.put("/:id",attendanceController.updateAttendanceByAttendanceId);
+attendanceRouter.delete("/:id",attendanceController.deleteAttendanceById)
 // export attendance router
 module.exports = attendanceRouter;

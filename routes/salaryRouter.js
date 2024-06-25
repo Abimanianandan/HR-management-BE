@@ -8,10 +8,11 @@ const auth = require("../middleware/auth");
 const salaryRouter = express.Router();
 
 // create routes
-salaryRouter.post('/', auth.isAuth, salaryController.createSalary);
-salaryRouter.get('/:userId', auth.isAuth, salaryController.getSalaryByUserId);
-salaryRouter.put('/:salaryId', auth.isAuth, salaryController.updateSalary);
-salaryRouter.delete('/:salaryId', auth.isAuth, salaryController.deleteSalary);
+salaryRouter.get('/allSalary',salaryController.getAllSalary);
+salaryRouter.post('/', salaryController.createSalary);
+salaryRouter.get('/:salaryId', salaryController.getSalaryBySalaryId);
+salaryRouter.put('/:salaryId', salaryController.updateSalary);
+salaryRouter.delete('/:salaryId', salaryController.deleteSalary);
 
 // export router
 module.exports = salaryRouter;

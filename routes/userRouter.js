@@ -9,14 +9,14 @@ const auth = require("../middleware/auth");
 const userRouter = express.Router();
 
 // define the endpoint
-userRouter.post("/",userController.register) 
+userRouter.post("/register",userController.register) 
 userRouter.post("/login",userController.login)
 
 // authorized user endpoints
-userRouter.get("/me", auth.isAuth, userController.me)
-userRouter.put("/update", auth.isAuth ,userController.update)
-userRouter.delete("/delete",auth.isAuth,userController.delete)
-userRouter.get("/logout",auth.isAuth,userController.logout)
+userRouter.get("/me",  userController.me)
+userRouter.put("/update", userController.update)
+userRouter.delete("/delete",userController.delete)
+userRouter.get("/logout",userController.logout)
 
 
 // export express router

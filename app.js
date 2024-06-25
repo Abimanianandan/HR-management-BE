@@ -17,7 +17,7 @@ const salaryRouter = require("./routes/salaryRouter")
 const leaveRouter = require("./routes/leaveRouter")
 
 // import the document router
-const documentRouter = require("./routes/documentRouter")
+// const documentRouter = require("./routes/documentRouter")
 
 // import cors
 const cors = require("cors");
@@ -31,10 +31,7 @@ const morgan = require("morgan");
 const app = express();
 
 // use cors middleware
-app.use(cors({
-    origin:"http://localhost:3001",
-    credentials:true
-}));
+app.use(cors());
 
 // use the cookie-parser middleware
 app.use(cookieParser());
@@ -52,6 +49,6 @@ app.use("/api/admin",adminRouter)
 app.use("/api/attendance",attendanceRouter)
 app.use("/api/salary",salaryRouter)
 app.use("/api/leave",leaveRouter)
-app.use("/api/document",documentRouter)
+// app.use("/api/document",documentRouter)
 // export the app module
 module.exports = app;

@@ -11,83 +11,85 @@ const jwt = require("jsonwebtoken")
 const adminController = {
     //   define the admin methods
 
-// create admin
+// create user
+
 register: async (req,res)=>{  
-    try {
-       // get the admin inputs from the request body
-       const {adminname,password,name,location} = req.body;
+  try {
+     // get the admin inputs from the request body
+     const {adminname,password,name,location} = req.body;
+
+     // check if the admin is already exists
+     const admin = await Admin.findOne({adminname});
+     // if the admin exists, return error message
+     if(admin){
+      
+         return res.status(400).json({message:"admin already exits"});
+     }
+     
+     // hash  the password
+     const passwordHash = await bcrypt.hash(password,10);
+
+     // create new admin
+        const newAdmin = new Admin({
+           adminname,
+           passwordHash,
+           name,
+           location
+     });
+     // save the admin
+     const savedAdmin = await newAdmin.save();
+    // return a success message with the saved user
+    res.status(201).json({message:"Admin created successfully",admin:savedAdmin});    
+  } catch (error) {
+     res.status(500).json({message:error.message})
+  }
  
-       // check if the admin is already exists
-       const admin = await Admin.findOne({adminname});
-       // if the admin exists, return error message
-       if(admin){
-        
-           return res.status(400).json({message:"admin already exits"});
-       }
-       
-       // hash  the password
-       const passwordHash = await bcrypt.hash(password,10);
- 
-       // create new admin
-          const newAdmin = new Admin({
-             adminname,
-             passwordHash,
-             name,
-             location
-       });
-       
-       // save the admin
-       const savedAdmin = await newAdmin.save();
-      // return a success message with the saved user
-      res.status(201).json({message:"Admin created successfully",admin:savedAdmin});    
-    } catch (error) {
-       res.status(500).json({message:error.message})
-    }
-   
- },
+},
+
  //   login admin
 
 login : async (req, res) => {
-   try {
-     const { adminname, password } = req.body;
- 
-     // Check if username or password is missing
-     if (!adminname || !password) {
-       return res.status(400).json({ message: "Adminname and password are required" });
-     }
- 
-     // Find user by adminname
-     const admin = await Admin.findOne({ adminname});
- 
-     // Check if admin exists
-     if (!admin) {
-       return res.status(400).json({ message: "Invalid adminname or password" });
-     }
- 
-     // Compare the provided password with hashed password in database
-     const isCorrectPassword =  bcrypt.compare(password, admin.passwordHash);
- 
-     // Check if password is correct
-     if (!isCorrectPassword) {
-       return res.status(400).json({ message: "Invalid adminname or password" });
-     }
- 
-    
-    const generateToken = (adminId) => {
-      // Create a JWT token with adminId and a secret key
-      const token = jwt.sign({ id: adminId }, config.JWT_SECRET, { expiresIn: '1h' }); 
-      return token;
-    };
-    
-    const adminId = 'dhonikbm@gmail.com'; 
-    const token = generateToken(adminId);
-     // Send success response with token
-     res.status(200).json({ message: "Login successful", token });
-   } catch (error) {
-     console.error("Login error:", error.message);
-     res.status(500).json({ message: "Server error" });
-   }
- },
+  try {
+    const { adminname, password } = req.body;
+
+    // Check if username or password is missing
+    if (!adminname || !password) {
+      return res.status(400).json({ message: "Adminname and password are required" });
+    }
+
+    // Find admin by adminname
+    const admin = await Admin.findOne({ adminname });
+
+    // Check if admin exists
+    if (!admin) {
+      return res.status(400).json({ message: "Invalid adminname or password" });
+    }
+
+    // Compare the provided password with hashed password in database
+    const isCorrectPassword = await bcrypt.compare(password, admin.passwordHash);
+
+    // Check if password is correct
+    if (!isCorrectPassword) {
+      return res.status(400).json({ message: "Invalid adminname or password" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: admin._id }, config.JWT_SECRET, { expiresIn: '1h' });
+
+    // Set cookie with the token
+    res.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 3600000, 
+      secure: false 
+    });
+
+    // Send success response
+    res.status(200).json({ message: "Login successful",token });
+  } catch (error) {
+    console.error("Login error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+},
 
  logout: async (req,res)=>{
   try{
@@ -103,7 +105,7 @@ login : async (req, res) => {
   me: async (req,res)=>{
    try{
       //  get the adminId from the request object
-      const adminId = req.userId;
+      const adminId = req.adminId;
       
       // find user by id from the database
       const admin = await Admin.findById(adminId).select("-passwordHash -_v -_id");

@@ -11,9 +11,9 @@ adminRouter.post("/login",adminController.login)
 
 // authenticated admin
 adminRouter.get("/logout",adminController.logout)
-adminRouter.get("/me",adminController.me)
 adminRouter.get("/allAdmins",adminController.getAllAdmins)
 adminRouter.get("/allUsers",adminController.getAllUsers)
+adminRouter.get("/:id",adminController.me)
 adminRouter.get("/:id",adminController.getUserById)
 adminRouter.put("/:id",adminController.updateUserById)
 adminRouter.delete("/:id",adminController.deleteUserById)

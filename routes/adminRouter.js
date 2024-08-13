@@ -13,10 +13,11 @@ adminRouter.post("/login",adminController.login)
 adminRouter.get("/logout",adminController.logout)
 adminRouter.get("/allAdmins",adminController.getAllAdmins)
 adminRouter.get("/allUsers",adminController.getAllUsers)
-adminRouter.get("/:id",adminController.me)
 adminRouter.get("/:id",adminController.getUserById)
 adminRouter.put("/:id",adminController.updateUserById)
 adminRouter.delete("/:id",adminController.deleteUserById)
+adminRouter.get("/:id",adminController.me)
+
 
 // export the admin route
 module.exports = adminRouter;
